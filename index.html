@@ -1,21 +1,57 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Barcode Scanner</title>
-  <style>
-    body { font-family: sans-serif; text-align: center; padding: 20px; }
-    #reader { width: 100%; max-width: 400px; margin: auto; }
-    #result { margin-top: 20px; font-size: 1.5em; }
-  </style>
-</head>
-<body>
+<html>
+  <head>
+    <title>Manual Camera Select Barcode Scanner</title>
+    <script src="https://unpkg.com/html5-qrcode@2.3.7/minified/html5-qrcode.min.js"></script>
+  </head>
+  <body>
+    <h1>Scan Barcode</h1>
 
-  <h1>Scan Barcode</h1>
-  <div id="reader"></div>
-  <div id="result">Result will appear here</div>
+    <select id="camera-select"></select>
+    <div id="reader" style="width: 300px; margin-top: 20px;"></div>
+    <div id="result" style="margin-top: 20px; font-size: 20px;"></div>
 
-  <script src="https://unpkg.com/html5-qrcode@2.3.7/minified/html5-qrcode.min.js"></script>
-  <script src="script.js"></script>
-</body>
+    <script>
+      function startScanner(cameraId) {
+        const html5QrCode = new Html5Qrcode("reader");
+        html5QrCode.start(
+          cameraId,
+          { fps: 10, qrbox: 250 },
+          (decodedText, decodedResult) => {
+            console.log("Scanned barcode: ", decodedText);
+            document.getElementById('result').innerText = `Scanned: ${decodedText}`;
+            html5QrCode.stop(); // Auto stop after scan
+          },
+          (errorMessage) => {
+            // console.error(errorMessage);
+          }
+        ).catch(err => {
+          console.error("Error starting scanner:", err);
+        });
+      }
+
+      Html5Qrcode.getCameras().then(devices => {
+        if (devices && devices.length) {
+          const select = document.getElementById('camera-select');
+          devices.forEach(device => {
+            const option = document.createElement('option');
+            option.value = device.id;
+            option.text = device.label || `Camera ${select.length + 1}`;
+            select.appendChild(option);
+          });
+
+          // Auto start first camera
+          startScanner(devices[0].id);
+
+          // Change camera when selection changes
+          select.addEventListener('change', function() {
+            document.getElementById('reader').innerHTML = ""; // Clear preview
+            startScanner(this.value);
+          });
+        }
+      }).catch(err => {
+        console.error("Error getting cameras:", err);
+      });
+    </script>
+  </body>
 </html>
