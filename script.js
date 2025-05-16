@@ -4,14 +4,15 @@ function onScanSuccess(decodedText, decodedResult) {
 }
 
 function onScanFailure(error) {
-  // console.warn(`Scan error: ${error}`);
+  // Ignore scan failure errors for now
 }
 
-// Config: facingMode 'environment' = kamera belakang
+// ✅ SIMPLER facingMode hint
 const html5QrcodeScanner = new Html5QrcodeScanner(
   "reader", 
-  { fps: 10, qrbox: 250, facingMode: { exact: "environment" } },
+  { fps: 10, qrbox: 250, facingMode: "environment" }, 
   false
 );
 
 html5QrcodeScanner.render(onScanSuccess, onScanFailure);
+
